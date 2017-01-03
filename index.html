@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<head>
+    <link rel="stylesheet" href="style.css" />
+
+
+</head>
+
+<body>
+
+    <div id="container">
+        <div id="kitContainer">
+            
+        <div id="boxContainer">
+            <div class='box' id="box1"></div>
+        </div>
+        <div id="tools">
+
+            <div id="innerTools">
+                <button type="button" id="reset">Reset</button>
+
+                <button type="button" id="darker">Darker</button>
+
+                <form id="paramBox" class="effectBox">
+                    <input type="range" title="Brush strength" min="1" max="255" value="85" id="bStrength">
+                    <input type="number" id="time" title="Time in between Loops" value="250" />
+                </form>
+
+                <form id="gradBox" class="effectBox">
+                    <button type="button" id="gradient">Gradient</button>
+                    <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="gradRange">
+                    <input type="number" id="gradX" title="Beginning value" value="0" />
+                    <input type="number" id="gradY" title="Amount to change by" value="1" />
+                </form>
+
+                <form id="fuzzBox" class="effectBox">
+                    <button type="button" id="fuzz">Fuzz</button>
+                    <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="fuzzRange">
+                    <input type="number" id="fuzzMin" title="Minimum value" value="0" />
+                    <input type="number" id="fuzzMax" title="Maximum value" value="255" />
+                    <input type="checkbox" id="fuzzMix" title="Mix" checked/>
+                </form>
+
+                <form id="whiteBox" class="effectBox">
+                    <button type="button" id="whiteShift">WhiteShift</button>
+                    <input type="range" min="0" max="255" title="Darkest color to shift" value="0" id="whiteRange">
+                </form>
+
+                <form id="boxBox" class="effectBox">
+                    <button type="button" id="makeBox">Make Box</button>
+                    <input type="range" title="Darkness of box" min="0" max="255" value="0" id="boxStrength">
+                    <input type="range" title="Size of box" min="0" max="10" value="0" id="boxSize">
+                    <input type="number" title="X position" id="boxX" value="0" />
+                    <input type="number" title="Y position" id="boxY" value="0" />
+                </form>
+            </div>
+        </div>
+    </div>
+        <div id="consoleBox">
+            <textarea id="console"></textarea>
+            <center>
+                <button id="consoleButton">Close Console</button>
+                <button id="runButton" class="hide">Run Console</button>
+                <p id="consoleInfo" class="hide">
+                    console commands: 'darker amount', 'gradient iterations x y', 'fuzz min max mix(boolean)'<br />
+                    for example: 'fuzz 0 255 true', seperate each command with a line break for sequencing.
+                </p>
+            </center>
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
