@@ -1,15 +1,21 @@
-var cWidth = $('#boxContainer').width();
-var cHeight = $('#boxContainer').height();
-var bWidth = $('.box').width();
-var bHeight = $('.box').height();
+var cWidth = 640;
+var cHeight = 480;
+var bWidth = 10;
+var bHeight = 10;
 var bStrength = parseInt($('#bStrength').val());
 var mDown = false;
 var conShow = true;
+
+var pixelRGB = [];
+var pixelCase = [];
+
+var canvas = document.getElementById('pixelCanvas');
+var ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
 $(document).ready(function() {
 
-    setup(); //create the canvas
-
-    //keeping track of if mouse is down or not.
+    setup();
 
     $(document).mousedown(function() {
         mDown = true;
@@ -22,13 +28,13 @@ $(document).ready(function() {
         bStrength = parseInt($('#bStrength').val());
     });
 
-    $('.box').on('mouseover', function() { //the drawing function!
-        if (mDown) {
-            var id = $(this).attr('id');
-            var nums = id.match(/\d+/g);
-            var x = parseInt(nums[0]);
-            var c = parseInt(nums[1]);
-            colorChange(x, c);
+    canvas.addEventListener('mousemove', function(e) {
+        if (!mDown) return;
+        var rect = canvas.getBoundingClientRect();
+        var r = Math.floor((e.clientY - rect.top) / bHeight);
+        var c = Math.floor((e.clientX - rect.left) / bWidth);
+        if (r >= 0 && r < cHeight / bHeight && c >= 0 && c < cWidth / bWidth) {
+            colorChange(r, c);
         }
     });
 
@@ -69,7 +75,6 @@ $(document).ready(function() {
         var strength = parseInt($('#boxStrength').val());
         var size = parseInt($('#boxSize').val());
         makeBox(x, c, size, strength);
-
     });
 
     $('#consoleButton').on('click', function() {
@@ -86,6 +91,7 @@ $(document).ready(function() {
             conShow = true;
         }
     });
+
     $('#runButton').on('click', function() {
         run();
     });
@@ -94,140 +100,36 @@ $(document).ready(function() {
         darker();
     });
 });
+
 function setup() {
-    console.log(cHeight);
-    console.log(cWidth);
-    console.log(bHeight);
-    console.log(bWidth);
-    console.log((cHeight / bHeight));
-    console.log((cWidth / bWidth));
-
-    for (var r = 0; r < (cHeight / bHeight); r++) {
-        for (var c = 0; c < ((cWidth / bWidth)); c++) {
-            var box = $("<div class='box' id=" + 'row-' + r + '-col-' + c + "></div>");
-            box.appendTo('#boxContainer');
+    for (var r = 0; r < cHeight / bHeight; r++) {
+        pixelRGB[r] = [];
+        pixelCase[r] = [];
+        for (var c = 0; c < cWidth / bWidth; c++) {
+            pixelRGB[r][c] = [255, 255, 255];
+            pixelCase[r][c] = 0;
         }
     }
-    //set case for all pixels to 0.
-    $('.box').data('case', 0);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, cWidth, cHeight);
 }
 
-function gradient(i = 1, one = 0, two = 1) {
-    for (a = 0; a < i; a++) {
-        one++;
-        for (var r = 0; r < (cHeight / bHeight); r++) {
-            two++;
-            for (var c = 0; c < (cWidth / bWidth); c++) {
-                subAmt = one * two;
-                colorChange(r, c, subAmt);
-            }
-        }
-    }
-}
-
-function doGradients(i = 1, one = 0, two = 1, time = 250) {
-    for (var x = 0; x < i; x++) {
-        setTimeout(function(y) {
-            gradient(1, one, two);
-        }, x * time, x);
-    }
-}
-
-function fuzz(min = 0, max = 255, mix = true) {
-    for (var r = 0; r < (cHeight / bHeight); r++) {
-        for (var c = 0; c < (cWidth / bWidth); c++) {
-            if (mix) {
-                var subAmt = (min + Math.floor(Math.random() * max))
-                colorChange(r, c, subAmt);
-            } else {
-                $('#' + 'row-' + r + '-col-' + c).css("background-color", randGen(min, max));
-            }
-        }
-    }
-}
-
-function randGen(min, max) {
-    var r = min + Math.floor(Math.random() * max);
-    var g = min + Math.floor(Math.random() * max);
-    var b = min + Math.floor(Math.random() * max);
-
-    return "rgb(" + r + "," + g + "," + b + ")";
-}
-
-
-
-function darker(amount) {
-    for (var x = 0; x < (cHeight / bHeight); x++) {
-        for (var c = 0; c < (cWidth / bWidth); c++) {
-            colorChange(x, c, amount);
-        }
-    }
-}
-
-function doFuzz(i = 1, min = 0, max = 255, mix = 0, time = 250) {
-    for (var x = 0; x < i; x++) {
-        setTimeout(function(y) {
-            fuzz(min, max, mix);
-        }, x * time, x);
-    }
-}
-
-function whiteShift(range) {
-    for (var x = 0; x < (cHeight / bHeight); x++) {
-        for (var c = 0; c < (cWidth / bWidth); c++) {
-            var info = getInfo(x, c);
-            var rgb = info[0];
-
-            if (rgb[0] > (255 - range) && rgb[1] > (255 - range) && rgb[2] > (255 - range)) {
-                cycleCase(x, c);
-                colorChange(x, c, 85);
-            }
-        }
-    }
-}
-
-function cycleCase(x, c) {
-    var info = getInfo(x, c);
-    var count = info[1];
-    switch (count) {
-        case 0:
-            $('#' + 'row-' + x + '-col-' + c).data('case', 1);
-            break;
-        case 1:
-            $('#' + 'row-' + x + '-col-' + c).data('case', 2);
-            break;
-        case 2:
-            $('#' + 'row-' + x + '-col-' + c).data('case', 0);
-            break;
-    }
+function drawPixel(r, c) {
+    var rgb = pixelRGB[r][c];
+    ctx.fillStyle = 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+    ctx.fillRect(c * bWidth, r * bHeight, bWidth, bHeight);
 }
 
 function getInfo(r, c) {
-    var color = $('#' + 'row-' + r + '-col-' + c).css('background-color');
-    var rgb = color.replace(/^rgb?\(|\s+|\)$/g, '').split(',');
-    rgb[0] = parseInt(rgb[0]);
-    rgb[1] = parseInt(rgb[1]);
-    rgb[2] = parseInt(rgb[2]);
-
-    var count = $('#' + 'row-' + r + '-col-' + c).data('case');
-
-    var info = [rgb, count];
-
-    return info;
+    return [pixelRGB[r][c].slice(), pixelCase[r][c]];
 }
 
-function makeBox(r, c, size, strength) {
-    var a = r - (size / 2);
-    var b = c + (size / 2);
-    console.log(a, b, size, strength);
-    for (var bb = b; bb < (b + (size / 2)); bb++) {
-        for (var ab = a; ab < (a + (size / 2)); ab++) {
-            colorChange(parseInt(ab), parseInt(bb), parseInt(strength));
-        }
-    }
+function cycleCase(r, c) {
+    pixelCase[r][c] = (pixelCase[r][c] + 1) % 3;
 }
 
-function colorChange(r, c, subAmt = bStrength) {
+function colorChange(r, c, subAmt) {
+    if (subAmt === undefined) subAmt = bStrength;
 
     var info = getInfo(r, c);
     var rgb = info[0];
@@ -277,33 +179,138 @@ function colorChange(r, c, subAmt = bStrength) {
             }
             break;
     }
-    $('#' + 'row-' + r + '-col-' + c).css("background-color", "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")");
+
+    rgb[0] = Math.max(0, Math.min(255, rgb[0]));
+    rgb[1] = Math.max(0, Math.min(255, rgb[1]));
+    rgb[2] = Math.max(0, Math.min(255, rgb[2]));
+
+    pixelRGB[r][c] = rgb;
+    drawPixel(r, c);
 }
 
+function gradient(i, one, two) {
+    if (i === undefined) i = 1;
+    if (one === undefined) one = 0;
+    if (two === undefined) two = 1;
+    for (var a = 0; a < i; a++) {
+        one++;
+        for (var r = 0; r < cHeight / bHeight; r++) {
+            two++;
+            for (var c = 0; c < cWidth / bWidth; c++) {
+                var subAmt = one * two;
+                colorChange(r, c, subAmt);
+            }
+        }
+    }
+}
+
+function doGradients(i, one, two, time) {
+    if (i === undefined) i = 1;
+    if (one === undefined) one = 0;
+    if (two === undefined) two = 1;
+    if (time === undefined) time = 250;
+    for (var x = 0; x < i; x++) {
+        setTimeout(function(y) {
+            gradient(1, one, two);
+        }, x * time, x);
+    }
+}
+
+function fuzz(min, max, mix) {
+    if (min === undefined) min = 0;
+    if (max === undefined) max = 255;
+    if (mix === undefined) mix = true;
+    for (var r = 0; r < cHeight / bHeight; r++) {
+        for (var c = 0; c < cWidth / bWidth; c++) {
+            if (mix) {
+                var subAmt = parseInt(min) + Math.floor(Math.random() * parseInt(max));
+                colorChange(r, c, subAmt);
+            } else {
+                pixelRGB[r][c] = randGen(min, max);
+                drawPixel(r, c);
+            }
+        }
+    }
+}
+
+function randGen(min, max) {
+    min = parseInt(min);
+    max = parseInt(max);
+    var r = min + Math.floor(Math.random() * max);
+    var g = min + Math.floor(Math.random() * max);
+    var b = min + Math.floor(Math.random() * max);
+    return [
+        Math.max(0, Math.min(255, r)),
+        Math.max(0, Math.min(255, g)),
+        Math.max(0, Math.min(255, b))
+    ];
+}
+
+function darker(amount) {
+    if (amount === undefined) amount = bStrength;
+    for (var x = 0; x < cHeight / bHeight; x++) {
+        for (var c = 0; c < cWidth / bWidth; c++) {
+            colorChange(x, c, amount);
+        }
+    }
+}
+
+function doFuzz(i, min, max, mix, time) {
+    if (i === undefined) i = 1;
+    if (min === undefined) min = 0;
+    if (max === undefined) max = 255;
+    if (mix === undefined) mix = 0;
+    if (time === undefined) time = 250;
+    for (var x = 0; x < i; x++) {
+        setTimeout(function(y) {
+            fuzz(min, max, mix);
+        }, x * time, x);
+    }
+}
+
+function whiteShift(range) {
+    for (var x = 0; x < cHeight / bHeight; x++) {
+        for (var c = 0; c < cWidth / bWidth; c++) {
+            var info = getInfo(x, c);
+            var rgb = info[0];
+            if (rgb[0] > (255 - range) && rgb[1] > (255 - range) && rgb[2] > (255 - range)) {
+                cycleCase(x, c);
+                colorChange(x, c, 85);
+            }
+        }
+    }
+}
+
+function makeBox(r, c, size, strength) {
+    var a = r - (size / 2);
+    var b = c + (size / 2);
+    for (var bb = b; bb < (b + (size / 2)); bb++) {
+        for (var ab = a; ab < (a + (size / 2)); ab++) {
+            colorChange(parseInt(ab), parseInt(bb), parseInt(strength));
+        }
+    }
+}
 
 function reset() {
-    for (var r = 0; r < (cHeight / bHeight); r++) {
-        for (var c = 0; c < (cWidth / bWidth); c++) {
-            var rgb = [255, 255, 255];
-            $('#' + 'row-' + r + '-col-' + c).css("background-color", "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")");
-            $('#' + 'row-' + r + '-col-' + c).data('case', 0);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, cWidth, cHeight);
+    for (var r = 0; r < cHeight / bHeight; r++) {
+        for (var c = 0; c < cWidth / bWidth; c++) {
+            pixelRGB[r][c] = [255, 255, 255];
+            pixelCase[r][c] = 0;
         }
     }
 }
 
 function run() {
     var code = $('#console').val();
-    console.log(code);
     var lines = code.split('\n');
     var matches = [];
     for (var i = 0; i < lines.length; i++) {
         matches.push(lines[i].match(/(\w+)/g));
     }
-    console.log(matches);
 
     for (var i = 0; i < lines.length; i++) {
-        console.log(i);
-        console.log(matches[0][0]);
         setTimeout(function(i) {
             switch (matches[i][0]) {
                 case "darker":
