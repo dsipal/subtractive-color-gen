@@ -1,82 +1,84 @@
 <!DOCTYPE html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css" />
-
-
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
-<body>
+<body class="bg-grey-600 flex flex-row justify-center items-center h-screen w-screen gap-4 p-8">
+    <div class="flex lg:flex-row md:flex-col sm:flex-col xs:flex-col gap-4 justify-center items-center">
+        <div class="flex flex-col">
+            <canvas id="pixelCanvas" width="640" height="480"
+                class="block border-3 border-black [image-rendering:pixelated]"></canvas>
+            <div id="tools" class="w-full pt-4">
+                <div id="innerTools" class="grid grid-cols-8 gap-3 bg-grey-700 p-4 rounded-lg justify-center">
 
-    <div id="container">
-        <div id="kitContainer">
-            
-        <canvas id="pixelCanvas" width="640" height="480"></canvas>
-        <div id="tools">
+                    <div class="flex flex-col gap-2">
+                        <button type="button" id="reset">Reset</button>
+                    </div>
+                    <form id="paramBox" class="flex flex-col gap-2">
+                        <button type="button" id="brush">Brush</button>
+                        <input type="range" title="Brush strength" min="1" max="255" value="85" id="bStrength">
+                        <input type="number" id="time" title="Time in between Loops" value="250" />
+                    </form>
 
-            <div id="innerTools">
-                <button type="button" id="reset">Reset</button>
+                    <form id="gradBox" class="flex flex-col gap-2">
+                        <button type="button" id="gradient">Gradient</button>
+                        <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="gradRange">
+                        <input type="number" id="gradX" title="Beginning value" value="0" />
+                        <input type="number" id="gradY" title="Amount to change by" value="1" />
+                    </form>
 
-                <button type="button" id="darker">Darker</button>
+                    <form id="fuzzBox" class="flex flex-col gap-2">
+                        <button type="button" id="fuzz">Fuzz</button>
+                        <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="fuzzRange">
+                        <input type="number" id="fuzzMin" title="Minimum value" value="0" />
+                        <div class="flex flex-row items-center gap-2">
+                            <input type="number" id="fuzzMax" title="Maximum value" value="255"
+                                class="flex-1 min-w-0" />
+                            <input type="checkbox" id="fuzzMix" title="Mix" checked />
+                        </div>
+                    </form>
 
-                <form id="paramBox" class="effectBox">
-                    <input type="range" title="Brush strength" min="1" max="255" value="85" id="bStrength">
-                    <input type="number" id="time" title="Time in between Loops" value="250" />
-                </form>
+                    <form id="whiteBox" class="flex flex-col gap-2">
+                        <button type="button" id="whiteShift">WhiteShift</button>
+                        <input type="range" min="0" max="255" title="Darkest color to shift" value="0" id="whiteRange">
+                    </form>
 
-                <form id="gradBox" class="effectBox">
-                    <button type="button" id="gradient">Gradient</button>
-                    <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="gradRange">
-                    <input type="number" id="gradX" title="Beginning value" value="0" />
-                    <input type="number" id="gradY" title="Amount to change by" value="1" />
-                </form>
-
-                <form id="fuzzBox" class="effectBox">
-                    <button type="button" id="fuzz">Fuzz</button>
-                    <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="fuzzRange">
-                    <input type="number" id="fuzzMin" title="Minimum value" value="0" />
-                    <input type="number" id="fuzzMax" title="Maximum value" value="255" />
-                    <input type="checkbox" id="fuzzMix" title="Mix" checked/>
-                </form>
-
-                <form id="whiteBox" class="effectBox">
-                    <button type="button" id="whiteShift">WhiteShift</button>
-                    <input type="range" min="0" max="255" title="Darkest color to shift" value="0" id="whiteRange">
-                </form>
-
-                <form id="boxBox" class="effectBox">
-                    <button type="button" id="makeBox">Make Box</button>
-                    <input type="range" title="Darkness of box" min="0" max="255" value="0" id="boxStrength">
-                    <input type="range" title="Size of box" min="0" max="10" value="0" id="boxSize">
-                    <input type="number" title="X position" id="boxX" value="0" />
-                    <input type="number" title="Y position" id="boxY" value="0" />
-                </form>
+                    <form id="boxBox" class="flex flex-col gap-2">
+                        <button type="button" id="makeBox">Make Box</button>
+                        <input type="range" title="Darkness of box" min="0" max="255" value="0" id="boxStrength">
+                        <input type="range" title="Size of box" min="0" max="10" value="0" id="boxSize">
+                        <input type="number" title="X position" id="boxX" value="0" />
+                        <input type="number" title="Y position" id="boxY" value="0" />
+                    </form>
+                    <div class="flex flex-col gap-2">
+                        <button type="button" id="darker">Darker</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-        <div id="consoleBox">
-            <textarea id="console"></textarea>
-            <center>
-                <button id="consoleButton">Close Console</button>
+
+        <div class="flex flex-col justify-center items-center h-128 w-128">
+            <textarea id="console"
+                class="w-[100%] h-[100%]  text-black border border-grey-900 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            <p id="consoleInfo" class="text-center text-12 text-grey-400 w-[100%]">
+                console commands: 'darker amount', 'gradient iterations x y', 'fuzz min max mix(boolean)'<br />
+                for example: 'fuzz 0 255 true', seperate each command with a line break for sequencing.
+            </p>
+            <div class="flex flex-row gap-2 justify-center">
+                <button id="consoleToggle">Console</button>
                 <button id="runButton" class="hide">Run Console</button>
-                <p id="consoleInfo" class="hide">
-                    console commands: 'darker amount', 'gradient iterations x y', 'fuzz min max mix(boolean)'<br />
-                    for example: 'fuzz 0 255 true', seperate each command with a line break for sequencing.
-                </p>
-            </center>
+                <div class="flex flex-row justify-center items-center gap-2 bg-grey-800 p-2">
+
+                </div>
+            </div>
         </div>
-
-
-    </div>
-
-
-
-
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script src="script.js"></script>
+        <script src="script.js"></script>
 </body>
 
 </html>

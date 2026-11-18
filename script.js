@@ -1,102 +1,114 @@
-var cWidth = 640;
-var cHeight = 480;
+const canvas = document.getElementById('pixelCanvas');
+var ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+var cWidth = canvas.width;
+var cHeight = canvas.height;
 var bWidth = 10;
 var bHeight = 10;
-var bStrength = parseInt($('#bStrength').val());
+var bStrength = parseInt(document.querySelector('#bStrength').value);
 var mDown = false;
 var conShow = true;
 
 var pixelRGB = [];
 var pixelCase = [];
 
-var canvas = document.getElementById('pixelCanvas');
-var ctx = canvas.getContext('2d');
-ctx.imageSmoothingEnabled = false;
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
 
     setup();
 
-    $(document).mousedown(function() {
+    document.addEventListener('mousedown', function() {
         mDown = true;
-    }).mouseup(function() {
+    });
+    document.addEventListener('mouseup', function() {
         mDown = false;
     });
-    $(document).tooltip();
 
-    $(document).on('input', '#bStrength', function() {
-        bStrength = parseInt($('#bStrength').val());
-    });
+    var bStrengthInput = document.querySelector('#bStrength');
+    if (bStrengthInput) {
+        bStrengthInput.addEventListener('input', function() {
+            bStrength = parseInt(bStrengthInput.value, 10);
+        });
+    }
+
+    function getCell(e) {
+        var rect = canvas.getBoundingClientRect();
+        // position inside the border, in screen pixels
+        var x = e.clientX - rect.left - canvas.clientLeft;
+        var y = e.clientY - rect.top - canvas.clientTop;
+        // convert to canvas pixels (clientWidth/Height leave out the border)
+        x *= canvas.width / canvas.clientWidth;
+        y *= canvas.height / canvas.clientHeight;
+        return { r: Math.floor(y / bHeight), c: Math.floor(x / bWidth) };
+    }
 
     canvas.addEventListener('mousemove', function(e) {
         if (!mDown) return;
-        var rect = canvas.getBoundingClientRect();
-        var r = Math.floor((e.clientY - rect.top) / bHeight);
-        var c = Math.floor((e.clientX - rect.left) / bWidth);
-        if (r >= 0 && r < cHeight / bHeight && c >= 0 && c < cWidth / bWidth) {
-            colorChange(r, c);
+        var cell = getCell(e);
+        if (cell.r >= 0 && cell.r < cHeight / bHeight &&
+            cell.c >= 0 && cell.c < cWidth / bWidth) {
+            colorChange(cell.r, cell.c);
         }
     });
 
-    $('#reset').on('click', function() {
+    document.querySelector('#reset').addEventListener('click', function() {
         reset();
     });
 
-    $('#gradient').on('click', function() {
-        var amount = $('#gradRange').val();
-        var time = $('#time').val();
-        var one = $('#gradX').val();
-        var two = $('#gradY').val();
+    document.querySelector('#gradient').addEventListener('click', function() {
+        var amount = document.querySelector('#gradRange').value;
+        var time = document.querySelector('#time').value;
+        var one = document.querySelector('#gradX').value;
+        var two = document.querySelector('#gradY').value;
         doGradients(amount, one, two, time);
     });
 
-    $('#fuzz').on('click', function() {
-        var amount = $('#fuzzRange').val();
-        var time = $('#time').val();
-        var min = $('#fuzzMin').val();
-        var max = $('#fuzzMax').val();
-        var mix = false;
-        if ($('#fuzzMix').is(':checked')) {
-            mix = true;
-        } else {
-            mix = false;
-        }
+    document.querySelector('#fuzz').addEventListener('click', function() {
+        var amount = document.querySelector('#fuzzRange').value;
+        var time = document.querySelector('#time').value;
+        var min = document.querySelector('#fuzzMin').value;
+        var max = document.querySelector('#fuzzMax').value;
+        var mix = document.querySelector('#fuzzMix').checked;
         doFuzz(amount, min, max, mix, time);
     });
 
-    $('#whiteShift').on('click', function() {
-        var range = $('#whiteRange').val();
+    document.querySelector('#whiteShift').addEventListener('click', function() {
+        var range = document.querySelector('#whiteRange').value;
         whiteShift(range);
     });
 
-    $('#makeBox').on('click', function() {
-        var x = parseInt($('#boxX').val());
-        var c = parseInt($('#boxY').val());
-        var strength = parseInt($('#boxStrength').val());
-        var size = parseInt($('#boxSize').val());
+    document.querySelector('#makeBox').addEventListener('click', function() {
+        var x = parseInt(document.querySelector('#boxX').value, 10);
+        var c = parseInt(document.querySelector('#boxY').value, 10);
+        var strength = parseInt(document.querySelector('#boxStrength').value, 10);
+        var size = parseInt(document.querySelector('#boxSize').value, 10);
         makeBox(x, c, size, strength);
     });
 
-    $('#consoleButton').on('click', function() {
+    document.querySelector('#consoleButton').addEventListener('click', function() {
         if (conShow) {
-            $('#console').slideUp('400');
-            $('.hide').hide();
-            $('#consoleButton').html('Open Console');
-            $('#consoleBox').css({'padding-bottom': '5px'});
+            document.querySelector('#console').style.display = 'none';
+            document.querySelectorAll('.hide').forEach(function(element) {
+                element.style.display = 'none';
+            });
+            document.querySelector('#consoleButton').textContent = 'Open Console';
+            document.querySelector('#consoleBox').style.paddingBottom = '5px';
             conShow = false;
         } else {
-            $('#console').slideDown('400');
-            $('.hide').show();
-            $('#consoleButton').html('Close Console');
+            document.querySelector('#console').style.display = '';
+            document.querySelectorAll('.hide').forEach(function(element) {
+                element.style.display = '';
+            });
+            document.querySelector('#consoleButton').textContent = 'Close Console';
             conShow = true;
         }
     });
 
-    $('#runButton').on('click', function() {
+    document.querySelector('#runButton').addEventListener('click', function() {
         run();
     });
 
-    $('#darker').on('click', function() {
+    document.querySelector('#darker').addEventListener('click', function() {
         darker();
     });
 });
@@ -303,24 +315,27 @@ function reset() {
 }
 
 function run() {
-    var code = $('#console').val();
+    var consoleInput = document.querySelector('#console');
+    var code = consoleInput ? consoleInput.value : '';
     var lines = code.split('\n');
     var matches = [];
+
     for (var i = 0; i < lines.length; i++) {
         matches.push(lines[i].match(/(\w+)/g));
     }
 
     for (var i = 0; i < lines.length; i++) {
-        setTimeout(function(i) {
-            switch (matches[i][0]) {
-                case "darker":
-                    darker(matches[i][1]);
+        setTimeout(function(index) {
+            if (!matches[index] || !matches[index][0]) return;
+            switch (matches[index][0]) {
+                case 'darker':
+                    darker(matches[index][1]);
                     break;
-                case "gradient":
-                    gradient(matches[i][1], matches[i][2], matches[i][3]);
+                case 'gradient':
+                    gradient(matches[index][1], matches[index][2], matches[index][3]);
                     break;
-                case "fuzz":
-                    fuzz(matches[i][1], matches[i][2], matches[i][3]);
+                case 'fuzz':
+                    fuzz(matches[index][1], matches[index][2], matches[index][3]);
                     break;
             }
         }, i * 250, i);
