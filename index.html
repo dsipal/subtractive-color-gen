@@ -9,76 +9,101 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
-<body class="bg-grey-600 flex flex-row justify-center items-center h-screen w-screen gap-4 p-8">
-    <div class="flex lg:flex-row md:flex-col sm:flex-col xs:flex-col gap-4 justify-center items-center">
-        <div class="flex flex-col">
+<body class="bg-grey-600 flex flex-row justify-center items-center h-screen w-screen gap-4 bg-cyan-200">
+
+    <div class="flex flex-col xl:flex-row w-full max-w-[1300px] items-center xl:items-stretch justify-center">
+        <div class="flex flex-col bg-grey-800 rounded-lg gap-4 justify-center items-center">
             <canvas id="pixelCanvas" width="640" height="480"
                 class="block border-3 border-black [image-rendering:pixelated]"></canvas>
-            <div id="tools" class="w-full pt-4">
-                <div id="innerTools" class="grid grid-cols-8 gap-3 bg-grey-700 p-4 rounded-lg justify-center">
+                
+            <div id="tools" 
+            class="grid grid-cols-7 gap-8 rounded-lg 
+            justify-items-center max-w-[640px] [&>*]:position-absolute 
+            [&>*]:top-1/2 [&>*]:translate-x-1/2 [&>*]:mx-2
+            bg-gray-100 p-4 rounded-sm
+            [&_input[type=range]]:appearance-none
+            [&_input[type=range]::-webkit-slider-thumb]:appearance-none
+            [&_input[type=range]::-webkit-slider-thumb]:w-2
+            [&_input[type=range]::-webkit-slider-thumb]:h-4
+            [&_input[type=range]::-webkit-slider-thumb]:bg-[#3b82f6]
+            [&_input[type=range]::-webkit-slider-thumb]:rounded-[2px]
+            [&_input[type=range]::-moz-range-thumb]:w-2
+            [&_input[type=range]::-moz-range-thumb]:h-4
+            [&_input[type=range]::-moz-range-thumb]:bg-[#3b82f6]
+            [&_input[type=range]::-moz-range-thumb]:border-0
+            [&_input[type=range]::-moz-range-thumb]:rounded-[2px]"
+            >
 
-                    <div class="flex flex-col gap-2">
-                        <button type="button" id="reset">Reset</button>
+                <div >
+                    <button type="button" id="reset">Reset</button>
+                </div>
+                <form id="paramBox">
+                    <button type="button" id="brush">Brush</button>
+                    <input type="range" title="Brush strength" min="1" max="255" value="85" id="bStrength">
+                </form>
+
+                <form id="gradBox">
+                    <button type="button" id="gradient">Gradient</button>
+                    <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="gradRange">
+                    <input type="number" id="time" title="Time in between Loops" value="250" id="time"/>
+                    <input type="number" id="gradX" title="Beginning value" value="0" />
+                    <input type="number" id="gradY" title="Amount to change by" value="1" />
+                </form>
+
+                <form id="fuzzBox">
+                    <button type="button" id="fuzz">Fuzz</button>
+                    <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="fuzzRange">
+                    <input type="number" id="fuzzMin" title="Minimum value" value="0" />
+                    <div class="flex flex-row items-center gap-2">
+                        <input type="number" id="fuzzMax" title="Maximum value" value="255"
+                            class="flex-1 min-w-0" />
+                        <input type="checkbox" id="fuzzMix" title="Mix" checked />
                     </div>
-                    <form id="paramBox" class="flex flex-col gap-2">
-                        <button type="button" id="brush">Brush</button>
-                        <input type="range" title="Brush strength" min="1" max="255" value="85" id="bStrength">
-                        <input type="number" id="time" title="Time in between Loops" value="250" />
-                    </form>
+                </form>
 
-                    <form id="gradBox" class="flex flex-col gap-2">
-                        <button type="button" id="gradient">Gradient</button>
-                        <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="gradRange">
-                        <input type="number" id="gradX" title="Beginning value" value="0" />
-                        <input type="number" id="gradY" title="Amount to change by" value="1" />
-                    </form>
-
-                    <form id="fuzzBox" class="flex flex-col gap-2">
-                        <button type="button" id="fuzz">Fuzz</button>
-                        <input type="range" min="1" max="50" value="1" title="Amount of times to loop" id="fuzzRange">
-                        <input type="number" id="fuzzMin" title="Minimum value" value="0" />
-                        <div class="flex flex-row items-center gap-2">
-                            <input type="number" id="fuzzMax" title="Maximum value" value="255"
-                                class="flex-1 min-w-0" />
-                            <input type="checkbox" id="fuzzMix" title="Mix" checked />
-                        </div>
-                    </form>
-
-                    <form id="whiteBox" class="flex flex-col gap-2">
-                        <button type="button" id="whiteShift">WhiteShift</button>
-                        <input type="range" min="0" max="255" title="Darkest color to shift" value="0" id="whiteRange">
-                    </form>
-
-                    <form id="boxBox" class="flex flex-col gap-2">
-                        <button type="button" id="makeBox">Make Box</button>
-                        <input type="range" title="Darkness of box" min="0" max="255" value="0" id="boxStrength">
-                        <input type="range" title="Size of box" min="0" max="10" value="0" id="boxSize">
-                        <input type="number" title="X position" id="boxX" value="0" />
-                        <input type="number" title="Y position" id="boxY" value="0" />
-                    </form>
-                    <div class="flex flex-col gap-2">
-                        <button type="button" id="darker">Darker</button>
-                    </div>
+                <form id="whiteBox">
+                    <button type="button" id="whiteShift">WhiteShift</button>
+                    <input type="range" min="0" max="255" title="Darkest color to shift" value="0" id="whiteRange">
+                </form>
+                <div>
+                    <button type="button" id="darker">Darker</button>
                 </div>
             </div>
         </div>
 
-        <div class="flex flex-col justify-center items-center h-128 w-128">
+        <div class="flex flex-col justify-center items-center h-128 w-128 p-4">
             <textarea id="console"
-                class="w-[100%] h-[100%]  text-black border border-grey-900 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-            <p id="consoleInfo" class="text-center text-12 text-grey-400 w-[100%]">
-                console commands: 'darker amount', 'gradient iterations x y', 'fuzz min max mix(boolean)'<br />
-                for example: 'fuzz 0 255 true', seperate each command with a line break for sequencing.
-            </p>
+                class="w-[100%] h-[100%]  text-black border border-grey-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            </textarea>
+        <div class="group absolute top-2 right-2">
+            <button type="button" aria-describedby="consoleInfo"
+                class="flex items-center justify-center w-6 h-6 rounded-full
+                       bg-gray-700 text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <span class="material-icons text-base leading-none">help_outline</span>
+            </button>
+
+            <div id="consoleInfo" role="tooltip"
+                class="invisible opacity-0 transition-opacity
+                       group-hover:visible group-hover:opacity-100
+                       group-focus-within:visible group-focus-within:opacity-100
+                       absolute right-0 top-8 z-10 w-64 p-2 rounded
+                       bg-gray-900 text-gray-100 text-xs shadow-lg">
+                Console commands: <code>darker amount</code>, <code>gradient iterations x y</code>,
+                <code>fuzz min max mix</code><br />
+                Example: <code>fuzz 0 255 true</code>. Put each command on its own line to run them in sequence.
+            </div>
+        </div>
             <div class="flex flex-row gap-2 justify-center">
-                <button id="consoleToggle">Console</button>
-                <button id="runButton" class="hide">Run Console</button>
+                <button id="runButton" class="bg-white hover:bg-gray-200 text-black py-2 px-2 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2">
+                    Run Console
+                </button>
                 <div class="flex flex-row justify-center items-center gap-2 bg-grey-800 p-2">
 
                 </div>
             </div>
         </div>
         <script src="script.js"></script>
+    </div>
 </body>
 
 </html>

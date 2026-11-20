@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setup();
 
+    document.querySelector('#brush').addEventListener('click', function() {
+        var brushStrength = parseInt(document.querySelector('#bStrength').value, 10);
+        bStrength = brushStrength;
+    });
+
     document.addEventListener('mousedown', function() {
         mDown = true;
     });
@@ -83,25 +88,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var strength = parseInt(document.querySelector('#boxStrength').value, 10);
         var size = parseInt(document.querySelector('#boxSize').value, 10);
         makeBox(x, c, size, strength);
-    });
-
-    document.querySelector('#consoleButton').addEventListener('click', function() {
-        if (conShow) {
-            document.querySelector('#console').style.display = 'none';
-            document.querySelectorAll('.hide').forEach(function(element) {
-                element.style.display = 'none';
-            });
-            document.querySelector('#consoleButton').textContent = 'Open Console';
-            document.querySelector('#consoleBox').style.paddingBottom = '5px';
-            conShow = false;
-        } else {
-            document.querySelector('#console').style.display = '';
-            document.querySelectorAll('.hide').forEach(function(element) {
-                element.style.display = '';
-            });
-            document.querySelector('#consoleButton').textContent = 'Close Console';
-            conShow = true;
-        }
     });
 
     document.querySelector('#runButton').addEventListener('click', function() {
@@ -293,16 +279,6 @@ function whiteShift(range) {
     }
 }
 
-function makeBox(r, c, size, strength) {
-    var a = r - (size / 2);
-    var b = c + (size / 2);
-    for (var bb = b; bb < (b + (size / 2)); bb++) {
-        for (var ab = a; ab < (a + (size / 2)); ab++) {
-            colorChange(parseInt(ab), parseInt(bb), parseInt(strength));
-        }
-    }
-}
-
 function reset() {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, cWidth, cHeight);
@@ -312,6 +288,11 @@ function reset() {
             pixelCase[r][c] = 0;
         }
     }
+}
+
+function showInfo() {
+    var consoleInfo = document.querySelector('#consoleInfo');   
+    consoleInfo.style.display = consoleInfo.style.display === 'none' ? '' : 'none';
 }
 
 function run() {
