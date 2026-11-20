@@ -115,7 +115,11 @@ function getInfo(r, c) {
 }
 
 function cycleCase(r, c) {
-    pixelCase[r][c] = (pixelCase[r][c] + 1) % 3;
+    if (pixelRGB[r][c].every(v => v === 0)) {
+        pixelRGB[r][c] = [255, 255, 255];
+        return pixelCase[r][c] = 0;
+    }
+    return pixelCase[r][c] = (pixelCase[r][c] + 1) % 3;
 }
 
 function colorChange(r, c, subAmt) {
@@ -123,16 +127,17 @@ function colorChange(r, c, subAmt) {
 
     var info = getInfo(r, c);
     var count = info[1] !== undefined ? info[1] : 0;
-    var rgb;
-
-    if(info[0][count] === undefined) {
-        info[0] = [255, 255, 255]
-    } else {
-        info[0][count] -= subAmt;
-        rgb = info[0];
+    var rgb = info[0] !== undefined ? info[0].slice() : [255, 255, 255];
+    if (rgb[count] < subAmt) {
+        count = cycleCase(r, c);
     }
+    if (rgb[count] < subAmt) {
+        count = cycleCase(r, c);
+        rgb = pixelRGB[r][c].slice();   // re-read in case cycleCase reset it to white
+    }
+    rgb[count] = rgb[count] - subAmt;
 
-    console.log(rgb);
+
 
     rgb[0] = Math.max(0, Math.min(255, rgb[0]));
     rgb[1] = Math.max(0, Math.min(255, rgb[1]));
