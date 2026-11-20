@@ -82,14 +82,6 @@ document.addEventListener('DOMContentLoaded', function() {
         whiteShift(range);
     });
 
-    document.querySelector('#makeBox').addEventListener('click', function() {
-        var x = parseInt(document.querySelector('#boxX').value, 10);
-        var c = parseInt(document.querySelector('#boxY').value, 10);
-        var strength = parseInt(document.querySelector('#boxStrength').value, 10);
-        var size = parseInt(document.querySelector('#boxSize').value, 10);
-        makeBox(x, c, size, strength);
-    });
-
     document.querySelector('#runButton').addEventListener('click', function() {
         run();
     });
@@ -130,59 +122,23 @@ function colorChange(r, c, subAmt) {
     if (subAmt === undefined) subAmt = bStrength;
 
     var info = getInfo(r, c);
-    var rgb = info[0];
-    var count = info[1];
+    var count = info[1] !== undefined ? info[1] : 0;
+    var rgb;
 
-    switch (count) {
-        case 0:
-            if (rgb[0] !== 0) {
-                rgb[0] -= subAmt;
-            } else if (rgb[0] === 0 && rgb[1] !== 0) {
-                rgb[1] -= subAmt;
-            } else if (rgb[0] === 0 && rgb[1] === 0 && rgb[2] !== 0) {
-                rgb[2] -= subAmt;
-            } else if (rgb[0] === 0 && rgb[1] === 0 && rgb[2] === 0) {
-                rgb[0] = 255;
-                rgb[1] = 255;
-                rgb[2] = 255;
-                cycleCase(r, c);
-            }
-            break;
-        case 1:
-            if (rgb[1] !== 0) {
-                rgb[1] -= subAmt;
-            } else if (rgb[1] === 0 && rgb[2] !== 0) {
-                rgb[2] -= subAmt;
-            } else if (rgb[1] === 0 && rgb[2] === 0 && rgb[0] !== 0) {
-                rgb[0] -= subAmt;
-            } else if (rgb[0] === 0 && rgb[1] === 0 && rgb[2] === 0) {
-                rgb[0] = 255;
-                rgb[1] = 255;
-                rgb[2] = 255;
-                cycleCase(r, c);
-            }
-            break;
-        case 2:
-            if (rgb[2] !== 0) {
-                rgb[2] -= subAmt;
-            } else if (rgb[2] === 0 && rgb[0] !== 0) {
-                rgb[0] -= subAmt;
-            } else if (rgb[0] === 0 && rgb[2] === 0 && rgb[1] !== 0) {
-                rgb[1] -= subAmt;
-            } else if (rgb[0] === 0 && rgb[1] === 0 && rgb[2] === 0) {
-                rgb[0] = 255;
-                rgb[1] = 255;
-                rgb[2] = 255;
-                cycleCase(r, c);
-            }
-            break;
+    if(info[0][count] === undefined) {
+        info[0] = [255, 255, 255]
+    } else {
+        info[0][count] -= subAmt;
+        rgb = info[0];
     }
+
+    console.log(rgb);
 
     rgb[0] = Math.max(0, Math.min(255, rgb[0]));
     rgb[1] = Math.max(0, Math.min(255, rgb[1]));
     rgb[2] = Math.max(0, Math.min(255, rgb[2]));
 
-    pixelRGB[r][c] = rgb;
+    pixelRGB[r][c] = [rgb[0], rgb[1], rgb[2]];
     drawPixel(r, c);
 }
 
